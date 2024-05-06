@@ -40,13 +40,37 @@ return_cluster_comb <- function(data_serie1, data_serie2, data_serie3, sessions,
   series1 <- data_serie1[,1:cols] %>% filter(session %in% sessions)
   series2 <- data_serie2[,1:cols] %>% filter(session %in% sessions)
   series3 <- data_serie3[,1:cols] %>% filter(session %in% sessions)
-  #series.pop.comb <- merge(series1, series2, by.x = "session", by.y = "session")
-  #series.pop.comb <- merge(series.pop.comb, series3, by.x = "session", by.y = "session")
   series.pop.comb <- merge(series1, series2, by.x = "session", by.y = "session", all=TRUE)
   series.pop.comb <- merge(series.pop.comb, series3, by.x = "session", by.y = "session", all=TRUE)
   series.pop.comb[is.na(series.pop.comb)] <- 0
-  series.pop.comb$k <- fit.cluster_kmeans(cluster_kmeans(k=num_k), series.pop.comb[,2:length((series.pop.comb))])
+  model <- cluster_kmeans(k=num_k)
+  model <- fit(model, series.pop.comb[,2:length((series.pop.comb))])
+  series.pop.comb$k <- cluster(model, series.pop.comb[,2:length((series.pop.comb))])
   return(series.pop.comb)
+}
+
+#function that combines the series
+return_series_comb <- function(data_serie1, data_serie2, data_serie3, sessions, cols) {
+  series1 <- data_serie1[,1:cols] %>% filter(session %in% sessions)
+  series2 <- data_serie2[,1:cols] %>% filter(session %in% sessions)
+  series3 <- data_serie3[,1:cols] %>% filter(session %in% sessions)
+  series.pop.comb <- merge(series1, series2, by.x = "session", by.y = "session", all=TRUE)
+  series.pop.comb <- merge(series.pop.comb, series3, by.x = "session", by.y = "session", all=TRUE)
+  series.pop.comb[is.na(series.pop.comb)] <- 0
+  return(series.pop.comb)
+}
+
+#function that get combined series and performs the clustering model
+return_cluster_model <- function(data_serie,num_k) {
+  model <- cluster_kmeans(k=num_k)
+  model <- fit(model, data_serie[,2:length((data_serie))])
+  return(model)
+}
+
+#function that combines the series and performs the clustering
+return_cluster <- function(data_serie,model) {
+  clu <- cluster(model, data_serie[,2:length((data_serie))])
+  return(clu)
 }
 
 #function for line plots
